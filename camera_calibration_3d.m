@@ -23,6 +23,7 @@ grid on
 [x, y] = size(real_points);
 P=[];
 for i=1:x
+    %%
     % In each iteration add 2 rows.
     P=[P; gen_mat_P(real_points(i,:),pixel_points(i,:))];
 end
@@ -30,11 +31,13 @@ P
 
 %% Calculate M by SVD
 [U,S,V] = svd(P);
+%%
 % Got M matrix from last col of V
 M=[(V(1:4,12))';(V(5:8,12))';(V(9:12,12))']
 
 %% Calculate camera center by SVD
 [m_U, m_S, m_V] = svd(M);
+%%
 % t is the last col of V of SVD of M,
 % center got from rescaling the t with setting the last one of t to 1
 t=m_V(:,end);
@@ -49,6 +52,7 @@ sin_x=-M_prime(3,2)/sqrt(M_prime(3,2)^2 + M_prime(3,3)^2);
 R_x=[1, 0, 0;
     0, cos_x, -sin_x;
     0, sin_x, cos_x;]
+%%
 % The asin() in matlab is arsin, and the result is radian.
 % We need to change it to degree.
 theta_x = asin(sin_x)*180/pi
