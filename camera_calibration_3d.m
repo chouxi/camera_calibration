@@ -25,3 +25,7 @@ for i=1:x
     P=[P; gen_mat_P(real_points(i,:),pixel_points(i,:))];
 end
 P
+
+%% Calculate M by SVD
+[U,S,V] = svd(P);
+M=[(V(1:4,12))';(V(5:8,12))';(V(8:11,12))']
