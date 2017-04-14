@@ -66,9 +66,10 @@ R_z = [cos_z, -sin_z, 0;
         0, 0, 1]
 theta_z = asin(sin_z)*180/pi
 
-%% Calculate K by M'/(R_x*R_y*R_z)
+%% Calculate K by M'/(R_x*R_y)
 % R_y is a diagnal matrix with the values are 1 on the diagnal.
-K = M_prime/(R_x*diag([1,1,1])*R_z);
+% R_z is factorized out
+K = M_prime/(R_x*diag([1,1,1]));
 K = K/K(3,3)
 fcoal=[K(1,1),K(2,2)]
 img_center=[K(1,3),K(2,3)]
