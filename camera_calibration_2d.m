@@ -9,17 +9,31 @@ file_list = {'images2.png', 'images9.png', 'images12.png', 'images20.png'};
 real_corners = [0 270 0 270;
                 0 0 210 210;
                 1 1 1 1];
-homo_list = [];
-for i=1:len
-    file_name = char(file_list(1,i));
-    image = imread(file_name);
-    figure
-    imshow(image);
-    [corners_x, corners_y] = ginput(4);
-    corner_mat = [corners_x'; corners_y'; ones(size(corners_x))'];
-    homo_tmp = homography2d(real_corners, corner_mat);
-    homo_list = [homo_list; homo_tmp/homo_tmp(end,end)];
-end
+%homo_list = [];
+%for i=1:len
+%    file_name = char(file_list(1,i));
+%    image = imread(file_name);
+%    figure
+%    imshow(image);
+%    [corners_x, corners_y] = ginput(4);
+%    corner_mat = [corners_x'; corners_y'; ones(size(corners_x))'];
+%    homo_tmp = homography2d(real_corners, corner_mat);
+%    homo_list = [homo_list; homo_tmp/homo_tmp(end,end)];
+%end
+homo_list =[
+    1.7715    0.1609   59.7405;
+    0.0266   -1.6353  418.2215;
+   -0.0000    0.0004    1.0000;
+    2.2890    0.0845  121.0000;
+    0.2942   -1.9913  433.0000;
+    0.0011    0.0003    1.0000;
+    1.1370    0.0866   98.0000;
+   -0.3046   -1.4381  399.0000;
+   -0.0009    0.0003    1.0000;
+    1.7424    0.5691  118.0000;
+   -0.0306   -0.8194  284.0000;
+   -0.0000    0.0017    1.0000;
+   ];
 %%
 % For printing file_name with homo value
 for i=1:len
@@ -51,4 +65,12 @@ A=[alpha gamma u_0;
    0 beta v_0;
    0 0 1]
 
-%% Computing rotation matrix
+%% Computing rotation matrix and t
+for i=1:len
+	file_name = char(file_list(1,i))
+	homo = homo_list(i*3-2:i*3,:);
+	r_1=lamda*inv(A)* homo(:,1);
+	r_2=lamda*inv(A) * homo(:,2);
+	R =[r_1 r_2 cross(r_1, r_2)]
+	t = lamda*inv(A) *homo(:,3)
+end
