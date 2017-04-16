@@ -73,4 +73,10 @@ for i=1:len
 	r_2=lamda*inv(A) * homo(:,2);
 	R =[r_1 r_2 cross(r_1, r_2)]
 	t = lamda*inv(A) *homo(:,3)
+	R_T_R = R'*R
+	%%
+	% get new R by SVD
+	[R_U, R_S, R_V] = svd(R);
+	new_R = R_U*R_V'
+	new_R_T_R=new_R'*new_R
 end
