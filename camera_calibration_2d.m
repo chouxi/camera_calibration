@@ -55,7 +55,7 @@ B=[b(1) b(2) b(4);
    b(2) b(3) b(5);
    b(4) b(5) b(6)]
 
-v_0=(B(1,1)*B(1,3)-B(1,1)*B(2,3))/(B(1,1)*B(2,2)-B(1,2)^2);
+v_0=(B(1,2)*B(1,3)-B(1,1)*B(2,3))/(B(1,1)*B(2,2)-B(1,2)^2);
 lamda=B(3,3) - (B(1,3)^2 + v_0*(B(1,2)*B(1,3)-B(1,1)*B(2,3)))/B(1,1);
 alpha=sqrt(lamda/B(1,1));
 beta=sqrt(lamda*B(1,1)/(B(1,1)*B(2,2)-B(1,2)^2));
@@ -82,8 +82,8 @@ for i=1:len
 end
 %% Improving Accuracy
 H_list =[];
-Acc_R_list =[];
-Acc_t_list =[];
+Acc_R_list ={};
+Acc_t_list ={};
 for i=1:len
 	file_name = char(file_list(1,i))
 	homo = homo_list(i*3-2:i*3,:);
@@ -131,7 +131,7 @@ for i=1:len
 	image_corner = image_corner ./ repmat(image_corner(3,:),size(p_approx,1), 1)
 	err_reprojection = sqrt(sum(sum((image_corner-p_correct).^2))) / size(image_corner,2)
 end
-%%% Step 5 We get step 6 before 5
+% Step 5 We get step 6 before 5
 Acc_V=[];
 for i=1:len
 	homo = H_list(i*3-2:i*3,:);
@@ -162,7 +162,9 @@ for i=1:len
 	% get new R by SVD
 	[R_U, R_S, R_V] = svd(R);
 	R = R_U*R_V'
-	Acc_R_list = [Acc_R_list;R];
+	Acc_R_list{i} = R;
 	t = lamda*inv(K) *homo(:,3)
-	Acc_t_list = [Acc_t_list;t];
+	Acc_t_list{i} = t;
 end
+
+%% Augument Reality
