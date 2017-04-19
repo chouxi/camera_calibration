@@ -80,3 +80,44 @@ for i=1:len
 	new_R = R_U*R_V'
 	new_R_T_R=new_R'*new_R
 end
+%% Improving Accuracy
+for i=1:len
+	file_name = char(file_list(1,i))
+	homo = homo_list(i*3-2:i*3,:);
+	%% Step 1
+	p_approx = homo * real_corners;
+	p_approx = p_approx ./ repmat(p_approx(3,:),size(p_approx,1), 1);
+	figure
+	image=imread(file_name);
+	imshow(image);
+	hold on
+	title('Figure 1 : Projected grid corners')
+	plot(p_approx(1,:), p_approx(2,:), 'o');
+	% pause for plot complete context in one figure
+	pause(0.5)
+	%%% Step 2
+	[cim, r, c, rsubp, csubp] = harris(rgb2gray(image), 2, 500, 2, 0);
+	harris_corner=[csubp, rsubp];
+	figure
+	image=imread(file_name);
+	imshow(image);
+	hold on
+	title('Figure 2 : Harris corners')
+	plot(harris_corner(:,1), harris_corner(:,2), '+');
+	pause(0.5)
+	%%% Step 3
+	for j=1:size(p_approx,2)
+		n = dist2(harris_corner, p_approx(1:2,j)');
+		[min_val row_idx] = min(n);
+		row_list(j) = row_idx;
+	end
+	row_list
+	p_correct=harris_corner(row_list(:),:);
+	figure
+	image=imread(file_name);
+	imshow(image);
+	hold on
+	title('Figure 3 : grid points')
+	plot(p_correct(:,1), p_correct(:,2), '+');
+	pause(0.5)
+end
