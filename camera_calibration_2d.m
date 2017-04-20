@@ -235,3 +235,10 @@ for i=1:len
     plot([obj_img_pt(4,1) obj_img_pt(8,1)], [obj_img_pt(4,2) obj_img_pt(8,2)],'r','LineWidth',2)
 	pause(0.5)
 end
+
+%% Extra Credit
+% From the chapter given
+% If n = 2, we can impose the skewless constraint γ = 0, i.e., [0, 1, 0, 0, 0, 0]b = 0
+% That means we assume the pixels construct a rectanguler
+
+extra_credit(homo_list, file_list)
