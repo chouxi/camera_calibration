@@ -137,7 +137,7 @@ for i=1:len
 	homo = H_list(i*3-2:i*3,:);
 	Acc_V=[Acc_V; get_v(homo)];
 end
-[V_U, V_S, V_V] = svd(V);
+[V_U, V_S, V_V] = svd(Acc_V);
 b=V_V(:,end);
 B=[b(1) b(2) b(4);
    b(2) b(3) b(5);
@@ -163,7 +163,7 @@ for i=1:len
 	Acc_t_list{i} = t;
 end
 
-%% Augument Reality
+%% Augment Reality Image
 
 % Because last 4 digits of my RUID are 3950, so I used picture 7.png
 clipart = imread('clipart/7.png');
@@ -173,7 +173,6 @@ clipart = imresize(clipart, min(270/ col_clip, 210/row_clip));
 [row_clip, col_clip, space]=size(clipart);
 for i=1:len
 	file_name = char(file_list(1,i))
-	homo = H_list(i*3-2:i*3,:);
 	image = imread(file_name);
 	projection = K*[Acc_R_list{i}(:,1:2) Acc_t_list{i}];
 	for j=1:row_clip
@@ -187,4 +186,50 @@ for i=1:len
 	end
 	figure
 	imshow(image)
+end
+
+%% Augment Reality Object
+
+obj_points = [0 0 0;
+			  90 0 0;
+			  90 90 0;
+			  0 90 0;
+			  0 0 90;
+			  90 0 90;
+			  90 90 90;
+			  0 90 90;
+			  ];
+for i=1:len
+	file_name = char(file_list(1,i))
+	image = imread(file_name);
+    R1=Acc_R_list{i}(:,1);
+    R2=Acc_R_list{i}(:,2);
+    R3=-cross(R1,R2);
+    R3=R3*(norm(R1) + norm(R2))/(2*norm(R3));
+    R=[R1 R2 R3];
+	projection = K*[R Acc_t_list{i}];
+	figure
+	imshow(image)
+	hold on
+    obj_img_pt = zeros(size(obj_points,1),2);
+	for j=1:size(obj_points ,1)
+		p = projection*[obj_points(j,1);obj_points(j,2); obj_points(j,3);1];
+		p = round(p / p(end,end));
+        obj_img_pt(j,:)=p(1:2)';
+    end
+    plot([obj_img_pt(1,1) obj_img_pt(2,1)], [obj_img_pt(1,2) obj_img_pt(2,2)],'r','LineWidth',2)
+    plot([obj_img_pt(2,1) obj_img_pt(3,1)], [obj_img_pt(2,2) obj_img_pt(3,2)],'r','LineWidth',2)
+    plot([obj_img_pt(3,1) obj_img_pt(4,1)], [obj_img_pt(3,2) obj_img_pt(4,2)],'r','LineWidth',2)
+    plot([obj_img_pt(4,1) obj_img_pt(1,1)], [obj_img_pt(4,2) obj_img_pt(1,2)],'r','LineWidth',2)
+
+    plot([obj_img_pt(5,1) obj_img_pt(6,1)], [obj_img_pt(5,2) obj_img_pt(6,2)],'r','LineWidth',2)
+    plot([obj_img_pt(6,1) obj_img_pt(7,1)], [obj_img_pt(6,2) obj_img_pt(7,2)],'r','LineWidth',2)
+    plot([obj_img_pt(7,1) obj_img_pt(8,1)], [obj_img_pt(7,2) obj_img_pt(8,2)],'r','LineWidth',2)
+    plot([obj_img_pt(8,1) obj_img_pt(5,1)], [obj_img_pt(8,2) obj_img_pt(5,2)],'r','LineWidth',2)
+
+    plot([obj_img_pt(1,1) obj_img_pt(5,1)], [obj_img_pt(1,2) obj_img_pt(5,2)],'r','LineWidth',2)
+    plot([obj_img_pt(2,1) obj_img_pt(6,1)], [obj_img_pt(2,2) obj_img_pt(6,2)],'r','LineWidth',2)
+    plot([obj_img_pt(3,1) obj_img_pt(7,1)], [obj_img_pt(3,2) obj_img_pt(7,2)],'r','LineWidth',2)
+    plot([obj_img_pt(4,1) obj_img_pt(8,1)], [obj_img_pt(4,2) obj_img_pt(8,2)],'r','LineWidth',2)
+	pause(0.5)
 end
