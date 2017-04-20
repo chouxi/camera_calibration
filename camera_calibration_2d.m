@@ -204,8 +204,10 @@ for i=1:len
 	image = imread(file_name);
     R1=Acc_R_list{i}(:,1);
     R2=Acc_R_list{i}(:,2);
-    R3=-cross(R1,R2);
-    R3=R3*(norm(R1) + norm(R2))/(2*norm(R3));
+	R3=Acc_R_list{i}(:,3);
+	% Nomalize the R3, Because too small.
+	% - the R3 make it upside down
+    R3=-R3*(norm(R1) + norm(R2))/(2*norm(R3));
     R=[R1 R2 R3];
 	projection = K*[R Acc_t_list{i}];
 	figure
