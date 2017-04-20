@@ -158,13 +158,33 @@ for i=1:len
 	r_1=lamda*inv(K)* homo(:,1);
 	r_2=lamda*inv(K) * homo(:,2);
 	R =[r_1 r_2 cross(r_1, r_2)];
-	%%
-	% get new R by SVD
-	[R_U, R_S, R_V] = svd(R);
-	R = R_U*R_V'
 	Acc_R_list{i} = R;
 	t = lamda*inv(K) *homo(:,3)
 	Acc_t_list{i} = t;
 end
 
 %% Augument Reality
+
+% Because last 4 digits of my RUID are 3950, so I used picture 7.png
+clipart = imread('clipart/7.png');
+[row_clip, col_clip, space]=size(clipart);
+% Resize the clipart
+clipart = imresize(clipart, min(270/ col_clip, 210/row_clip));
+[row_clip, col_clip, space]=size(clipart);
+for i=1:len
+	file_name = char(file_list(1,i))
+	homo = H_list(i*3-2:i*3,:);
+	image = imread(file_name);
+	projection = K*[Acc_R_list{i}(:,1:2) Acc_t_list{i}];
+	for j=1:row_clip
+		for k=1:col_clip
+			if sum(clipart(row_clip+1-j,k,:)) ~= 0
+				p = projection*[k;j;1];
+				p = round(p / p(end,end));
+				image(p(2),p(1),:) = clipart(row_clip+1-j,k,:);
+			end
+		end
+	end
+	figure
+	imshow(image)
+end
