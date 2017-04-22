@@ -27,7 +27,7 @@ homo_list =[
     2.2890    0.0845  121.0000;
     0.2942   -1.9913  433.0000;
     0.0011    0.0003    1.0000;
-    1.1370    0.0866   98.0000;
+    1.1370    0.0866   98.0000; 
    -0.3046   -1.4381  399.0000;
    -0.0009    0.0003    1.0000;
     1.7424    0.5691  118.0000;
@@ -56,7 +56,7 @@ B=[b(1) b(2) b(4);
    b(4) b(5) b(6)]
 
 v_0=(B(1,2)*B(1,3)-B(1,1)*B(2,3))/(B(1,1)*B(2,2)-B(1,2)^2);
-lamda=B(3,3) - (B(1,3)^2 + v_0*(B(1,2)*B(1,3)-B(1,1)*B(2,3)))/B(1,1)
+lamda=B(3,3) - (B(1,3)^2 + v_0*(B(1,2)*B(1,3)-B(1,1)*B(2,3)))/B(1,1);
 alpha=sqrt(lamda/B(1,1));
 beta=sqrt(lamda*B(1,1)/(B(1,1)*B(2,2)-B(1,2)^2));
 gamma=-B(1,2)*(alpha^2)*beta/lamda;
@@ -88,6 +88,17 @@ for i=1:len
 	file_name = char(file_list(1,i))
 	homo = homo_list(i*3-2:i*3,:);
 	%% Step 1
+	real_corners = [];
+	ind_i = 0;
+	for i=1:10
+		ind_j = 0;
+		for j=1:8
+			real_corners = [real_corners; ind_i, ind_j];
+			ind_j = ind_j + 30;
+		end
+		ind_i = ind_i + 30;
+	end
+	real_corners = [real_corners'; ones(size(real_corners, 1),1)']
 	p_approx = homo * real_corners;
 	p_approx = p_approx ./ repmat(p_approx(3,:),size(p_approx,1), 1);
 	figure
@@ -95,7 +106,7 @@ for i=1:len
 	imshow(image);
 	hold on
 	title('Figure 1 : Projected grid corners')
-	plot(p_approx(1,:), p_approx(2,:), 'o');
+	plot(p_approx(1,:), p_approx(2,:), 'ro');
 	% pause for plot complete context in one figure
 	pause(0.5)
 	%%% Step 2
@@ -106,7 +117,7 @@ for i=1:len
 	imshow(image);
 	hold on
 	title('Figure 2 : Harris corners')
-	plot(harris_corner(:,1), harris_corner(:,2), '+');
+	plot(harris_corner(:,1), harris_corner(:,2), 'r+');
 	pause(0.5)
 	%%% Step 3
 	for j=1:size(p_approx,2)
@@ -120,7 +131,7 @@ for i=1:len
 	imshow(image);
 	hold on
 	title('Figure 3 : grid points')
-	plot(p_correct(:,1), p_correct(:,2), '+');
+	plot(p_correct(:,1), p_correct(:,2), 'r+');
 	pause(0.5)
 	%%% Step 4
 	p_correct = [p_correct'; ones(1,size(p_correct,1))]
@@ -163,6 +174,15 @@ for i=1:len
 	Acc_t_list{i} = t;
 end
 
+%% A way to find corner automatically
+% From Harris Corner detector, we can get many corners including the ones we really want.
+% First the pixel of the corner we want is dark, it's filter out many times.
+% And the measure of the grid is bigger than the noises.
+% Second we already know the distance of these 4 points.
+% Although the image is distorted, we can get use a approximate distance.
+% Then we can use this approximate of grid distance to find the proper grid corners.
+% From these grid corners, we get the four outward corners as the corner we want.
+
 %% Augment Reality Image
 
 % Because last 4 digits of my RUID are 3950, so I used picture 7.png
@@ -186,6 +206,7 @@ for i=1:len
 	end
 	figure
 	imshow(image)
+	pause(0.5)
 end
 
 %% Augment Reality Object
