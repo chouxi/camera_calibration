@@ -9,31 +9,31 @@ file_list = {'images2.png', 'images9.png', 'images12.png', 'images20.png'};
 real_corners = [0 270 0 270;
                 0 0 210 210;
                 1 1 1 1];
-%homo_list = [];
-%for i=1:len
-%    file_name = char(file_list(1,i));
-%    image = imread(file_name);
-%    figure
-%    imshow(image);
-%    [corners_x, corners_y] = ginput(4);
-%    corner_mat = [corners_x'; corners_y'; ones(size(corners_x))'];
-%    homo_tmp = homography2d(real_corners, corner_mat);
-%    homo_list = [homo_list; homo_tmp/homo_tmp(end,end)];
-%end
-homo_list =[
-    1.7715    0.1609   59.7405;
-    0.0266   -1.6353  418.2215;
-   -0.0000    0.0004    1.0000;
-    2.2890    0.0845  121.0000;
-    0.2942   -1.9913  433.0000;
-    0.0011    0.0003    1.0000;
-    1.1370    0.0866   98.0000; 
-   -0.3046   -1.4381  399.0000;
-   -0.0009    0.0003    1.0000;
-    1.7424    0.5691  118.0000;
-   -0.0306   -0.8194  284.0000;
-   -0.0000    0.0017    1.0000;
-   ];
+homo_list = [];
+for i=1:len
+    file_name = char(file_list(1,i));
+    image = imread(file_name);
+    figure
+    imshow(image);
+    [corners_x, corners_y] = ginput(4);
+    corner_mat = [corners_x'; corners_y'; ones(size(corners_x))'];
+    homo_tmp = homography2d(real_corners, corner_mat);
+    homo_list = [homo_list; homo_tmp/homo_tmp(end,end)];
+end
+%homo_list =[
+%    1.7715    0.1609   59.7405;
+%    0.0266   -1.6353  418.2215;
+%   -0.0000    0.0004    1.0000;
+%    2.2890    0.0845  121.0000;
+%    0.2942   -1.9913  433.0000;
+%    0.0011    0.0003    1.0000;
+%    1.1370    0.0866   98.0000; 
+%   -0.3046   -1.4381  399.0000;
+%   -0.0009    0.0003    1.0000;
+%    1.7424    0.5691  118.0000;
+%   -0.0306   -0.8194  284.0000;
+%   -0.0000    0.0017    1.0000;
+%   ];
 %%
 % For printing file_name with homo value
 for i=1:len
@@ -69,10 +69,11 @@ K=[alpha gamma u_0;
 for i=1:len
 	file_name = char(file_list(1,i))
 	homo = homo_list(i*3-2:i*3,:);
-	r_1=lamda*inv(K)* homo(:,1);
-	r_2=lamda*inv(K) * homo(:,2);
+	lambda = 1/sqrt(sum((inv(K) *homo(:,2)).^2));
+	r_1=lambda*inv(K)* homo(:,1);
+	r_2=lambda*inv(K) * homo(:,2);
 	R =[r_1 r_2 cross(r_1, r_2)]
-	t = lamda*inv(K) *homo(:,3)
+	t = lambda*inv(K) *homo(:,3)
 	R_T_R = R'*R
 	%%
 	% get new R by SVD
@@ -98,7 +99,7 @@ for i=1:len
 		end
 		ind_i = ind_i + 30;
 	end
-	real_corners = [real_corners'; ones(size(real_corners, 1),1)']
+	real_corners = [real_corners'; ones(size(real_corners, 1),1)'];
 	p_approx = homo * real_corners;
 	p_approx = p_approx ./ repmat(p_approx(3,:),size(p_approx,1), 1);
 	figure
@@ -134,12 +135,12 @@ for i=1:len
 	plot(p_correct(:,1), p_correct(:,2), 'r+');
 	pause(0.5)
 	%%% Step 4
-	p_correct = [p_correct'; ones(1,size(p_correct,1))]
+	p_correct = [p_correct'; ones(1,size(p_correct,1))];
     H = homography2d(real_corners, p_correct)
     H_list = [H_list; H/H(end,end)];
 	%%% Step 6 Sum of Square Error
 	image_corner = H*real_corners;
-	image_corner = image_corner ./ repmat(image_corner(3,:),size(p_approx,1), 1)
+	image_corner = image_corner ./ repmat(image_corner(3,:),size(p_approx,1), 1);
 	err_reprojection = sqrt(sum(sum((image_corner-p_correct).^2))) / size(image_corner,2)
 end
 % Step 5 We get step 6 before 5
@@ -166,11 +167,12 @@ K=[alpha gamma u_0;
 for i=1:len
 	file_name = char(file_list(1,i))
 	homo = H_list(i*3-2:i*3,:);
-	r_1=lamda*inv(K)* homo(:,1);
-	r_2=lamda*inv(K) * homo(:,2);
+	lambda = 1/sqrt(sum((inv(K) *homo(:,2)).^2));
+	r_1=lambda*inv(K)* homo(:,1);
+	r_2=lambda*inv(K) * homo(:,2);
 	R =[r_1 r_2 cross(r_1, r_2)]
 	Acc_R_list{i} = R;
-	t = lamda*inv(K) *homo(:,3)
+	t = lambda*inv(K) *homo(:,3)
 	Acc_t_list{i} = t;
 end
 
@@ -185,20 +187,21 @@ end
 
 %% Augment Reality Image
 
+
 % Because last 4 digits of my RUID are 3950, so I used picture 7.png
-clipart = imread('clipart/7.png');
+[clipart space alpha] = imread('clipart/7.png');
 [row_clip, col_clip, space]=size(clipart);
 % Resize the clipart
-clipart = imresize(clipart, min(270/ col_clip, 210/row_clip));
-[row_clip, col_clip, space]=size(clipart);
+scalar = min(270/ col_clip, 210/row_clip);
 for i=1:len
 	file_name = char(file_list(1,i))
+	homo = H_list(i*3-2:i*3,:);
 	image = imread(file_name);
-	projection = K*[Acc_R_list{i}(:,1:2) Acc_t_list{i}];
+	%projection = K*[Acc_R_list{i}(:,1:2) Acc_t_list{i}];
 	for j=1:row_clip
 		for k=1:col_clip
-			if sum(clipart(row_clip+1-j,k,:)) ~= 0
-				p = projection*[k;j;1];
+			if alpha(row_clip+1-j,k) ~= 0
+				p = homo*[k*scalar;j*scalar;1];
 				p = round(p / p(end,end));
 				image(p(2),p(1),:) = clipart(row_clip+1-j,k,:);
 			end
@@ -223,14 +226,7 @@ obj_points = [0 0 0;
 for i=1:len
 	file_name = char(file_list(1,i))
 	image = imread(file_name);
-    R1=Acc_R_list{i}(:,1);
-    R2=Acc_R_list{i}(:,2);
-	R3=Acc_R_list{i}(:,3);
-	% Nomalize the R3, Because too small.
-	% - the R3 make it upside down
-    R3=-R3*(norm(R1) + norm(R2))/(2*norm(R3));
-    R=[R1 R2 R3];
-	projection = K*[R Acc_t_list{i}];
+	projection = K*[Acc_R_list{i} Acc_t_list{i}];
 	figure
 	imshow(image)
 	hold on
